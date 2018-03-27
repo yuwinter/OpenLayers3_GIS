@@ -1,0 +1,96 @@
+<span style="font-size:18px;"><!DOCTYPE html>  
+<html>  
+  <head>  
+    <title>Custom Controls</title>  
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.2.0/css/ol.css" type="text/css">  
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->  
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>  
+    <script src="https://openlayers.org/en/v4.2.0/build/ol.js"></script>  
+    <style>  
+      .rotate-north {  
+        top: 65px;  
+        left: .5em;  
+      }  
+      .ol-touch .rotate-north {  
+        top: 80px;  
+      }  
+    </style>  
+  </head>  
+  <body>  
+    <div id="map" class="map"></div>  
+    <script>  
+      /**  
+       * Define a namespace for the application.  
+       * 为应用定义一个命名空间  
+      */  
+      window.app = {};  
+      var app = window.app;  
+  
+      // Define rotate to north control.  
+      // 定义一个旋转到北的控件  
+  
+  
+      /**  
+       * @constructor  
+       * @extends {ol.control.Control}  
+       * @param {Object=} opt_options Control options.  
+       */  
+      app.RotateNorthControl = function(opt_options) {  
+        // 设置  
+        var options = opt_options || {};  
+        // 创建一个按钮  
+        var button = document.createElement('button');  
+        button.innerHTML = 'N';  
+  
+        var this_ = this;  
+        // 处理旋转到北的函数  
+        var handleRotateNorth = function() {  
+          // 获取地图视图并设置旋转为0  
+          this_.getMap().getView().setRotation(0);  
+        };  
+  
+        // 添加click事件监听和touchstart事件监听  
+        button.addEventListener('click', handleRotateNorth, false);  
+        button.addEventListener('touchstart', handleRotateNorth, false);  
+  
+        // 创建一个DIV并添加之前创建的Button  
+        var element = document.createElement('div');  
+        element.className = 'rotate-north ol-unselectable ol-control';  
+        element.appendChild(button);  
+  
+        // 构造Control  
+        ol.control.Control.call(this, {  
+          element: element,  
+          target: options.target  
+        });  
+  
+      };  
+      // RotateNorthControl从Control中继承原型方法  
+      ol.inherits(app.RotateNorthControl, ol.control.Control);  
+  
+      // Create map, giving it a rotate to north control.  
+      // 创建地图并给他它添加一个旋转到北的控件  
+  
+      var map = new ol.Map({  
+        controls: ol.control.defaults({  
+          attributionOptions: /** @type {olx.control.AttributionOptions} */ ({  
+            collapsible: false  
+          })  
+        }).extend([  
+          new app.RotateNorthControl()  
+        ]),  
+        layers: [  
+          new ol.layer.Tile({  
+            source: new ol.source.OSM()  
+          })  
+        ],  
+        target: 'map',  
+        view: new ol.View({  
+          center: [0, 0],  
+          zoom: 3,  
+          rotation: 1  
+        })  
+      });  
+    </script>  
+  </body>  
+</html></span>  

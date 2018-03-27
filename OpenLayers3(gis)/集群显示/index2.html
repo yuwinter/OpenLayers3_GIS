@@ -1,0 +1,128 @@
+<!DOCTYPE html>  
+<html xmlns="http://www.w3.org/1999/xhtml">  
+<head>  
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>  
+    <title></title>  
+    <script type="text/javascript" src="../js/ol.js" ></script>
+    <script type="text/javascript">  
+        window.onload = function () {  
+            //初始化地图  
+            var map = new ol.Map({  
+                target: 'map',  
+                layers: [  
+                    new ol.layer.Tile({  
+                        source: new ol.source.OSM()  
+                    })  
+                ],  
+                view: new ol.View({  
+                    center: new ol.proj.fromLonLat([116.28, 39.54]),  
+                    zoom: 8  
+                })  
+            });  
+  
+            //创建要素的数量  
+            //10000个点没有任何压力，50000个点稍微有些卡了，100000个点可以把浏览器卡崩溃  
+            var count = 10000;  
+            //创建一个要素数组  
+            var features = new Array(count);  
+            //坐标偏移量  
+            var e = 8500000;  
+  
+            for (var i = 0; i < count; i++) {  
+                //要素坐标  
+                var coordinates = [3 * e * Math.random() - e, 2 * e * Math.random() - e];  
+                //新建点要素  
+                features[i] = new ol.Feature(new ol.geom.Point(coordinates));  
+            }  
+  
+            //初始化矢量数据源  
+            var source = new ol.source.Vector({  
+                //要素  
+                features:features  
+            });  
+  
+            //初始化聚合标注数据源  
+            var clusterSource = new ol.source.Cluster({  
+                //标注元素之间的间距  
+                distance: 40,  
+                //数据源  
+                source:source  
+            });  
+  
+            //样式缓存  
+            var styleCache = {};  
+            //初始化矢量图层  
+            var clusters = new ol.layer.Vector({  
+                //数据源  
+                source: clusterSource,  
+                //样式  
+                style: function (feature, resolution) {  
+                    //当前聚合标注数据源的要素大小  
+                    var size = feature.get('features').length;  
+                    //定义样式  
+                    var style = styleCache[size];  
+                    //如果当前样式不存在则创建  
+                    if (!style) {  
+                        style = [  
+                            //初始化样式  
+                            new ol.style.Style({  
+                                //点样式  
+                                image: new ol.style.Circle({  
+                                    //点的半径  
+                                    radius: 10,  
+                                    //笔触  
+                                    stroke: new ol.style.Stroke({  
+                                        color: '#fff'  
+                                    }),  
+                                    //填充  
+                                    fill: new ol.style.Fill({  
+                                        color: '#3399cc'  
+                                    })  
+                                }),  
+                                //文本样式  
+                                text: new ol.style.Text({  
+                                    //文本内容  
+                                    text: size.toString(),  
+                                    //填充  
+                                    fill: new ol.style.Fill({  
+                                        color: '#fff'  
+                                    })  
+                                })  
+                            })  
+                        ];  
+                        styleCache[size] = style;  
+                    }  
+                    return style;  
+                }  
+            });  
+            //将聚合标注图层添加到map中  
+            map.addLayer(clusters);  
+  
+            //获取添加聚合标注按钮  
+            document.getElementById('addFeatures').onclick = function () {  
+                //获取聚合标注数据源中的要素  
+                var currentFeatures = clusterSource.getSource().getFeatures();  
+                //如果当前数据源中没有任何要素则添加  
+                if (currentFeatures.length == 0) {  
+                    clusterSource.getSource().addFeatures(features);  
+                    clusters.setSource(clusterSource);  
+                    map.addLayer(clusters);  
+                }  
+            };  
+  
+            //获取移除聚合标注的按钮  
+            document.getElementById('removeFeatures').onclick = function () {  
+                //清除聚合标注数据源中的所有元素  
+                clusterSource.getSource().clear();  
+                //从map中移除聚合标注图层  
+                map.removeLayer(clusters);  
+            };  
+        };  
+    </script>  
+</head>  
+<body>  
+    <input type="button" name="name" value="添加聚合标签" id="addFeatures" />  
+    <input type="button" name="name" value="移除聚合标签" id="removeFeatures" />  
+    <div id="map"></div>  
+</body>  
+</html>  

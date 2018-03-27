@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>根据经纬度显示坐标点展示对应的图片</title>
+    <link rel="stylesheet" href="../css/ol.css" />
+    <script type="text/javascript" src="../js/ol.js" ></script>
+  </head>
+  <body>
+    <div id="map" class="map">
+    	 <div id="mouse-position"></div>
+    </div>
+    <script>
+      function createStyle(src, img) {
+        return new ol.style.Style({
+       /** @type {olx.style.IconOptions} 此方法也可以设置图片的集合*/
+          image: new ol.style.Icon( ({
+            anchor: [0.5, 0.96],//默认值是[0.5, 0.5]（图标中心）
+            crossOrigin: 'anonymous',//加载图像的属性
+            src: src,//图片来源URI
+            img: img,
+            imgSize: img ? [img.width, img.height] : undefined
+            //图像大小以像素为单位 只有在img已设置且src不是的情况下以及在Internet Explorer 11中的SVG图像时才需要。提供的内容imgSize需要与图像的实际大小相匹配。
+          }))
+        });
+      }
+      var iconFeature = new ol.Feature(new ol.geom.Point([111.93128159461, 28.848983590473]));//设置图片的经纬度坐标的位置
+      iconFeature.set('style', createStyle('../img/icon.png', undefined));//设置图片的路基
+
+       //自定义geoserver中wms的地址。
+      var maplayer= new ol.layer.Image({
+				source: new ol.source.ImageWMS({
+					url: 'http://localhost:8080/geoserver/CN/wms',  
+					params: {'LAYERS': 'layers:RailWay','VERSION':'1.1.0'}, 
+					 serverType: 'geoserver'  
+				})
+			});
+			//采用自己提供的地图
+	var raster = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+      var map = new ol.Map({
+        layers: [
+          raster,
+          new ol.layer.Vector({
+            style: function(feature) {
+              return feature.get('style');
+            },
+            source: new ol.source.Vector({features: [iconFeature]})//将图片添加号图层中
+          })
+        ],
+        target: document.getElementById('map'),
+        view: new ol.View({
+          center: [111.93128159461, 28.848983590473],
+          zoom: 3
+        })
+      });
+
+      var selectStyle = {};
+      var select = new ol.interaction.Select({
+        style: function(feature) {
+          var image = feature.get('style').getImage().getImage();
+          if (!selectStyle[image.src]) {
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            context.drawImage(image, 0, 0, image.width, image.height);
+            var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imageData.data;
+            for (var i = 0, ii = data.length; i < ii; i = i + (i % 4 == 2 ? 2 : 1)) {
+              data[i] = 255 - data[i];
+            }
+            context.putImageData(imageData, 0, 0);
+            selectStyle[image.src] = createStyle(undefined, canvas);
+          }
+          return selectStyle[image.src];
+        }
+      });
+      map.addInteraction(select);
+
+      map.on('pointermove', function(evt) {
+        map.getTargetElement().style.cursor =
+            map.hasFeatureAtPixel(evt.pixel) ? 'pointer' : '';
+      });
+      
+      var mousePositionControl=new ol.control.MousePosition({
+            coordinateFormat:ol.coordinate.createStringXY(4),
+            projection:"EPSG:4326",
+            className:"custom-mouse-position",
+            target:document.getElementById("mouse-position"),
+            undefinedHTML:"&nbsp"
+        });
+        map.addControl(mousePositionControl);
+//     map.on('click', function(event){
+//     alert(event.XYZ().x;
+//  })
+    </script>
+  </body>
+</html>

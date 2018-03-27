@@ -1,0 +1,186 @@
+<!DOCTYPE html>  
+<html>  
+  <head>  
+    <title>Advanced View Positioning</title>  
+    <link rel="stylesheet" href="https://openlayers.org/en/v4.2.0/css/ol.css" type="text/css">  
+    <!-- The line below is only needed for old environments like Internet Explorer and Android 4.x -->  
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=requestAnimationFrame,Element.prototype.classList,URL"></script>  
+    <script src="https://openlayers.org/en/v4.2.0/build/ol.js"></script>  
+    <style>  
+      .mapcontainer {  
+        position: relative;  
+        margin-bottom: 20px;  
+      }  
+      .map {  
+        width: 1000px;  
+        height: 600px;  
+      }  
+      div.ol-zoom {  
+        top: 178px;  
+        left: 158px;  
+      }  
+      div.ol-attribution {  
+        bottom: 30px;  
+        right: 50px;  
+      }  
+      .padding-top {  
+        position: absolute;  
+        top: 0;  
+        left: 0px;  
+        width: 1000px;  
+        height: 170px;  
+        background: rgba(255, 255, 255, 0.5);  
+      }  
+      .padding-left {  
+        position: absolute;  
+        top: 170px;  
+        left: 0;  
+        width: 150px;  
+        height: 400px;  
+        background: rgba(255, 255, 255, 0.5);  
+      }  
+      .padding-right {  
+        position: absolute;  
+        top: 170px;  
+        left: 950px;  
+        width: 50px;  
+        height: 400px;  
+        background: rgba(255, 255, 255, 0.5);  
+      }  
+      .padding-bottom {  
+        position: absolute;  
+        top: 570px;  
+        left: 0px;  
+        width: 1000px;  
+        height: 30px;  
+        background: rgba(255, 255, 255, 0.5);  
+      }  
+      .center {  
+        position: absolute;  
+        border: solid 1px black;  
+        top: 490px;  
+        left: 560px;  
+        width: 20px;  
+        height: 20px;  
+      }  
+    </style>  
+  </head>  
+  <body>  
+    <div class="mapcontainer">  
+      <div id="map" class="map"></div>  
+      <div class="padding-top"></div>  
+      <div class="padding-left"></div>  
+      <div class="padding-right"></div>  
+      <div class="padding-bottom"></div>  
+      <div class="center"></div>  
+    </div>  
+    <button id="zoomtoswitzerlandbest">Zoom to Switzerland</button> (best fit),<br/>  
+    <button id="zoomtoswitzerlandconstrained">Zoom to Switzerland</button> (respect resolution constraint).<br/>  
+    <button id="zoomtoswitzerlandnearest">Zoom to Switzerland</button> (nearest),<br/>  
+    <button id="zoomtolausanne">Zoom to Lausanne</button> (with min resolution),<br/>  
+    <button id="centerlausanne">Center on Lausanne</button>  
+    <script>  
+      var source = new ol.source.Vector({  
+        url: 'https://openlayers.org/en/v4.2.0/examples/data/geojson/switzerland.geojson',  
+        format: new ol.format.GeoJSON()  
+      });  
+      var style = new ol.style.Style({  
+        fill: new ol.style.Fill({  
+          color: 'rgba(255, 255, 255, 0.6)'  
+        }),  
+        stroke: new ol.style.Stroke({  
+          color: '#319FD3',  
+          width: 1  
+        }),  
+        image: new ol.style.Circle({  
+          radius: 5,  
+          fill: new ol.style.Fill({  
+            color: 'rgba(255, 255, 255, 0.6)'  
+          }),  
+          stroke: new ol.style.Stroke({  
+            color: '#319FD3',  
+            width: 1  
+          })  
+        })  
+      });  
+      var vectorLayer = new ol.layer.Vector({  
+        source: source,  
+        style: style  
+      });  
+      var view = new ol.View({  
+        center: [0, 0],  
+        zoom: 1  
+      });  
+      var map = new ol.Map({  
+        layers: [  
+          new ol.layer.Tile({  
+            source: new ol.source.OSM()  
+          }),  
+          vectorLayer  
+        ],  
+        target: 'map',  
+        controls: ol.control.defaults({  
+          attributionOptions: /** @type {olx.control.AttributionOptions} */ ({  
+            collapsible: false  
+          })  
+        }),  
+        view: view  
+      });  
+  
+      var zoomtoswitzerlandbest = document.getElementById('zoomtoswitzerlandbest');  
+      /*  
+       * fit  
+       * Fit the given geometry or extent based on the given map size and border.  
+       * 基于给定的地图大小和边界来适应几何对象或者范围  
+       * The size is pixel dimensions of the box to fit the extent into.  
+       * size是盒子的像素大小来适应范围  
+       * In most cases you will want to use the map size, that is <code>map.getSize()</code>.  
+       * 在大多数情况下你会使用地图的大小，可以通过map.getSize()方法获得  
+       * Takes care of the map angle.  
+       * 注意地图的角度  
+       * fit的具体参数请参考API文档，我在此就不展开细说了  
+       */  
+      zoomtoswitzerlandbest.addEventListener('click', function() {  
+        var feature = source.getFeatures()[0];  
+        var polygon = /** @type {ol.geom.SimpleGeometry} */ (feature.getGeometry());  
+        view.fit(polygon, {padding: [170, 50, 30, 150], constrainResolution: false});  
+      }, false);  
+  
+      var zoomtoswitzerlandconstrained =  
+          document.getElementById('zoomtoswitzerlandconstrained');  
+      zoomtoswitzerlandconstrained.addEventListener('click', function() {  
+        var feature = source.getFeatures()[0];  
+        var polygon = /** @type {ol.geom.SimpleGeometry} */ (feature.getGeometry());  
+        view.fit(polygon, {padding: [170, 50, 30, 150]});  
+      }, false);  
+  
+      var zoomtoswitzerlandnearest =  
+          document.getElementById('zoomtoswitzerlandnearest');  
+      zoomtoswitzerlandnearest.addEventListener('click', function() {  
+        var feature = source.getFeatures()[0];  
+        var polygon = /** @type {ol.geom.SimpleGeometry} */ (feature.getGeometry());  
+        view.fit(polygon, {padding: [170, 50, 30, 150], nearest: true});  
+      }, false);  
+  
+      var zoomtolausanne = document.getElementById('zoomtolausanne');  
+      zoomtolausanne.addEventListener('click', function() {  
+        var feature = source.getFeatures()[1];  
+        var point = /** @type {ol.geom.SimpleGeometry} */ (feature.getGeometry());  
+        view.fit(point, {padding: [170, 50, 30, 150], minResolution: 50});  
+      }, false);  
+  
+      var centerlausanne = document.getElementById('centerlausanne');  
+      /*  
+       * centerOn  
+       * Center on coordinate and view position.  
+       * 把中心放置在坐标或者视图位置  
+       */  
+      centerlausanne.addEventListener('click', function() {  
+        var feature = source.getFeatures()[1];  
+        var point = /** @type {ol.geom.Point} */ (feature.getGeometry());  
+        var size = /** @type {ol.Size} */ (map.getSize());  
+        view.centerOn(point.getCoordinates(), size, [570, 500]);  
+      }, false);  
+    </script>  
+  </body>  
+</html>  
