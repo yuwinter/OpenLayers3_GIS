@@ -1,0 +1,73 @@
+﻿html,body {
+    margin:0;/*如果注释，页面出现滚动条*/
+    width:100%;
+    height:100%;
+}
+.map {
+    width:100%;
+    height:80%;
+}
+/****************start  鹰眼的设置***********************/
+  .ol-custom-overviewmap,
+      .ol-custom-overviewmap.ol-uncollapsible {
+        bottom: auto;
+        left: auto;
+        right: 0;
+        top: 0;
+      }
+
+      .ol-custom-overviewmap:not(.ol-collapsed)  {
+        border: 1px solid black;
+      }
+
+      .ol-custom-overviewmap .ol-overviewmap-map {
+        border: none;
+        width: 300px;
+      }
+
+      .ol-custom-overviewmap .ol-overviewmap-box {
+        border: 2px solid red;
+      }
+
+      .ol-custom-overviewmap:not(.ol-collapsed) button{
+        bottom: auto;
+        left: auto;
+        right: 1px;
+        top: 1px;
+      }
+
+      .ol-rotate {
+        top: 170px;
+        right: 0;
+      }
+/****************end  鹰眼的设置***********************/
+
+/****************start /缩放工具条的设置***********************/
+/****************还有两种样式的显示。具体可以查看网址http://openlayers.org/en/latest/examples/zoomslider.html?q=ZoomSlider+***********************/
+#map .ol-zoom .ol-zoom-out {
+        margin-top: 204px;
+      }
+      #map .ol-zoomslider {
+      	/********默认的样式是白色的 background-color: transparent;***********/
+        background-color: #4DB39E;
+        top: 2.3em;
+      }
+
+      #map .ol-touch .ol-zoom .ol-zoom-out {
+        margin-top: 212px;
+      }
+      #map .ol-touch .ol-zoomslider {
+        top: 2.75em;
+      }
+
+      #map .ol-zoom-in.ol-has-tooltip:hover [role=tooltip],
+      #map .ol-zoom-in.ol-has-tooltip:focus [role=tooltip] {
+        top: 3px;
+      }
+
+      #map .ol-zoom-out.ol-has-tooltip:hover [role=tooltip],
+      #map .ol-zoom-out.ol-has-tooltip:focus [role=tooltip] {
+        top: 232px;
+      }
+      
+/****************end /缩放工具条的设置***********************/

@@ -1,0 +1,106 @@
+<!DOCTYPE html>  
+<html xmlns="http://www.w3.org/1999/xhtml">  
+<head>  
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>  
+    <title></title>  
+   <script type="text/javascript" src="../js/ol.js" ></script>
+   <link rel="stylesheet" href="../css/ol.css" />
+    <style type="text/css">  
+        body,html,div{  
+            border:none;padding:0;margin:0;  
+            font-size:14px;  
+            font-family:"微软雅黑";  
+        }  
+        #menu{  
+            width:100%;  
+            height:20px;           
+            padding:5px 10px;  
+            left:10px;      
+        }  
+        .container{  
+            float:left;  
+            width:32%;  
+            height:850px;  
+            margin:0 5px;  
+        }          
+        .map{  
+            float:left;  
+            width:100%;  
+            height:100%;  
+            border:1px dashed red;  
+        }  
+    </style>  
+    <script type="text/javascript">  
+        window.onload = function () {  
+            //初始化矢量图层  
+            var vector = new ol.layer.Vector({  
+                source: new ol.source.Vector({  
+                    url: '../data/geojson/countries-110m.json',  
+                    format: new ol.format.GeoJSON()  
+                })  
+            });  
+  
+            //以Canvas渲染方式初始化地图  
+            var cavasMap = new ol.Map({  
+                layers: [  
+                    new ol.layer.Tile({  
+                        source:new ol.source.OSM()  
+                    })  
+                ],  
+                target: 'canvasMap',  
+                view: new ol.View({  
+                    center: [0, 0],  
+                    zoom:4  
+                })  
+            });  
+  
+            //以Dom渲染方式初始化地图  
+            var domMap = new ol.Map({  
+                layers: [  
+                    vector  
+                ],  
+                renderer:'dom',  
+                target: 'domMap',  
+                view: cavasMap.getView()  
+            });  
+  
+            //以WebGL渲染方式初始化地图  
+            //如果当前浏览器支持WebGL渲染方式，则使用WebGL渲染  
+            //否则改变no-webgl这个div标签的样式，显示浏览器不支持的信息  
+            if (ol.has.WEBGL) {  
+                var webglMap = new ol.Map({  
+                    layers: [  
+                        new ol.layer.Tile({  
+                            source:new ol.source.OSM()  
+                        })  
+                    ],  
+                    renderer: 'webgl',  
+                    target: 'webglMap',  
+                    view: cavasMap.getView()  
+                });  
+            } else {  
+                var info = document.getElementById('no-webgl');  
+                info.style.display = '';  
+            }  
+        };  
+    </script>  
+</head>  
+<body>  
+    <div class="container">  
+        <label>Canvas</label>  
+        <div id="canvasMap" class="map"></div>  
+    </div>  
+    <div class="container">  
+        <label>Dom</label>  
+        <div id="domMap" class="map"></div>  
+    </div>  
+    <div class="container">  
+        <label>WebGL</label>  
+        <div id="webglMap" class="map">  
+            <div id="no-webgl" class="alert alert-error" style="display:none">  
+                亲！你的浏览器不支持WebGL哦，赶紧升级吧~  
+            </div>  
+        </div>  
+    </div>  
+</body>  
+</html>  

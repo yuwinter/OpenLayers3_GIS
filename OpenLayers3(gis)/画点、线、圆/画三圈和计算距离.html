@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>05画三圈和计算距离</title>
+		<meta http-equiv="X-UA-Compatible" content="chrome=1">
+		<link href="css/common/ol.css" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="../js/ol.js" ></script>
+		<script type="text/javascript" src="../js/jquery.min.js" ></script>
+		<script type="text/javascript" src="../js/MYMAP.js" ></script>
+	</head>
+	<style>
+		.ol-popup {
+			position: absolute;
+			background-color: white;
+			padding-top: 5px;
+			padding-left: 10px;
+			padding-right: 10px;
+			padding-bottom: 10px;
+			border-radius: 2px;
+			border: 1px solid #cccccc;
+			bottom: 12px;
+			left: -50px;
+		}
+		
+		.ol-popup:after,
+		.ol-popup:before {
+			top: 100%;
+			border: solid transparent;
+			content: " ";
+			position: absolute;
+		}
+		
+		/*border-top-color：用于制作三角形*/
+		.ol-popup:after {
+			border-top-color: white;
+			border-width: 10px;
+			left: 48px;
+			margin-left: -10px;
+		}
+		
+		.ol-popup:before {
+			border-top-color: #cccccc;
+			border-width: 11px;
+			left: 48px;
+			margin-left: -11px;
+		}
+		
+		.ol-popup-title {
+			border-bottom: 1px solid #cccccc;
+			padding-bottom: 3px;
+		}
+		
+		.ol-popup-content {
+			margin-top: 8px;
+			width:260px;
+		}
+		
+		.ol-popup-closer {
+			text-decoration: none;
+			position: absolute;
+			top: 5px;
+			right: 10px;
+		}
+		
+		.ol-popup-closer:after {
+			content: "✖";
+		}
+	</style>
+	<script>
+		 var raster = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+		/**
+		 * 地图的底图服务模块
+		 */
+		var map_source = "wmts"; //地图的服务类型
+		var map_projection = "EPSG:3857"; //地图坐标系（3857：墨卡托， 4326：经纬度）
+		//map_url此处使用的是【Portable Basemap Server】作为地图服务
+		var map_url = "http://localhost:7080/PBS/rest/services/lanzhou/MapServer/WMTS/tile/1.0.0/lanzhou/default/nativeTileMatrixSet/{z}/{y}/{x}.png";
+		//var map_dataLayer = "layer_tdt_sl"; //地图服务的图层
+		var map_zoom = 17; //初始化地图缩放级别
+		var map_minZoom = 14; //地图最小缩放级别
+		var map_maxZoom = 20; //地图最大缩放级别
+		var map_x = 11557761.4071486; //地图x坐标（此处以兰州地图作为中心点）
+		var map_y = 4307993.90607275; //地图y坐标（此处以兰州地图作为中心点）
+		$(document).ready(function() {
+			var baseLayer = new ol.layer.Tile({
+				opacity: 1.0,
+				source: new ol.source.XYZ({
+					url: map_url 
+				})
+			});
+			if(raster) {
+				var config = {
+					center: [map_x, map_y],
+					zoom: map_zoom,
+					maxZoom: map_maxZoom,
+					minZoom: map_minZoom
+				};
+				//实例化地图
+				MYMAP.init(raster, config);
+				//画三圈
+				MYMAP.dispose();
+				//资源弹框
+				MYMAP.popup();
+			}
+			// 弹出窗口关闭
+			$("#popup-closer").click(function(){
+				MYMAP.overlay.setPosition(undefined);
+			});
+		});
+	</script>
+	<body>
+		<!-- 地图对象 -->
+		<div id="map" class="map">
+			<div id="popup" class="ol-popup">
+				<div id="popup-title" class="ol-popup-title"></div>
+				<a href="#" id="popup-closer" class="ol-popup-closer"></a>
+				<div id="popup-content" class="ol-popup-content"></div>
+			</div>
+		</div>	
+	</body>
+</html>
